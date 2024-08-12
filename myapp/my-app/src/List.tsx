@@ -35,17 +35,31 @@ const List: React.FC = () => {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/items/${id}`);
+      setItems(items.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("There was an error deleting the item!", error);
+    }
+  };
+
+  const handleToggle = async (id: number) => {
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+
+    const updatedItem = { ...item, done: !item.done };
+    try {
+      await axios.put(`http://localhost:3001/api/items/${id}`, updatedItem);
+      setItems(items.map(item => item.id === id ? updatedItem : item));
+    } catch (error) {
+      console.error("There was an error updating the item!", error);
+    }
+  };
+
   useEffect(() => {
     getItems();
   }, []);
-
-  const handleToggle = (id: number) => {
-    setItems(items.map(item => item.id === id ? { ...item, done: !item.done } : item));
-  };
-
-  const handleDelete = (id: number) => {
-    setItems(items.filter(item => item.id !== id));
-  };
 
   return (
       <div>

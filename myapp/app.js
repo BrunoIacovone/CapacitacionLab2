@@ -9,6 +9,7 @@ app.use(cors());
 const items = [];
 
 app.get('/api/items', (req, res) => {
+    console.log("Items requested");
     res.json(items);
 });
 
@@ -17,6 +18,18 @@ app.post('/api/items', (req, res) => {
     items.push(item);
     console.log("Item added: ", item);
     res.json(item);
+});
+
+app.put('/api/items/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const index = items.findIndex(item => item.id === id);
+    if (index === -1) {
+        res.status(404).send('Not found');
+    } else {
+        items[index] = req.body;
+        console.log("Item updated: ", items[index]);
+        res.json(items[index]);
+    }
 });
 
 app.delete('/api/items/:id', (req, res) => {
