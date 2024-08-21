@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { List as MUIList, Typography, TextField, Button } from "@mui/material";
-import Item from "./Item";
+import Item from "../item/Item";
+import './List.css';
 
 interface Item {
   id: number;
   text: string;
-  done: boolean;
+  isRead: boolean;
 }
 
 const List: React.FC = () => {
@@ -17,6 +18,7 @@ const List: React.FC = () => {
     try {
       const response = await axios.get("http://localhost:3001/api/items");
       setItems(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("There was an error fetching the items!", error);
     }
@@ -25,7 +27,7 @@ const List: React.FC = () => {
   const addItem = async () => {
     if (newItemText.trim() === "") return;
 
-    const newItem = { id: Date.now(), text: newItemText, done: false };
+    const newItem = { id: Date.now(), text: newItemText, isRead: false };
     try {
       const response = await axios.post("http://localhost:3001/api/items", newItem);
       setItems([...items, response.data]);
@@ -48,9 +50,9 @@ const List: React.FC = () => {
     const item = items.find(item => item.id === id);
     if (!item) return;
 
-    const updatedItem = { ...item, done: !item.done };
+    const updatedItem = { ...item, isRead: !item.isRead };
     try {
-      await axios.put(`http://localhost:3001/api/items/${id}`, updatedItem);
+      await axios.put(`http://localhost:3001/api/items/toggle/${id}`, updatedItem);
       setItems(items.map(item => item.id === id ? updatedItem : item));
     } catch (error) {
       console.error("There was an error updating the item!", error);
@@ -62,22 +64,24 @@ const List: React.FC = () => {
   }, []);
 
   return (
-      <div>
-        <Typography variant="h4">Item List</Typography>
-        <TextField
-            label="New Item"
-            value={newItemText}
-            onChange={(e) => setNewItemText(e.target.value)}
-        />
-        <Button variant="contained" color="primary" onClick={addItem}>
-          Add Item
-        </Button>
-        <MUIList>
+      <div className="list-container">
+        <Typography variant="h4" className="list-header">Item List</Typography>
+        <div className="list-input">
+          <TextField
+              label="New Item"
+              value={newItemText}
+              onChange={(e) => setNewItemText(e.target.value)}
+          />
+          <Button variant="contained" color="primary" onClick={addItem}>
+            Add Item
+          </Button>
+        </div>
+        <MUIList className="list-items">
           {items.map(item => (
               <Item
                   key={item.id}
                   text={item.text}
-                  done={item.done}
+                  isRead={item.isRead}
                   onToggle={() => handleToggle(item.id)}
                   onDelete={() => handleDelete(item.id)}
               />
